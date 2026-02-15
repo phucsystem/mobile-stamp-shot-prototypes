@@ -1,0 +1,946 @@
+<!--
+  Screen: S-01 Camera Screen (CameraScreen.tsx)
+  CJX Stage: Usage
+  FR Mapping: FR-01, FR-03, FR-04, FR-05, FR-13
+  Reference: Timestamp camera app pattern (rich watermark overlay + zoom controls + address)
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S-01 Camera</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="components.css">
+  <style>
+    /* --- White Camera Layout --- */
+    .camera-layout {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--white);
+    }
+
+    /* --- White Top Bar --- */
+    .camera-white-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 52px var(--space-lg) var(--space-sm);
+      background: var(--white);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .camera-white-top-bar button {
+      width: var(--icon-button);
+      height: var(--icon-button);
+      border-radius: var(--radius-full);
+      border: none;
+      background: var(--gray2);
+      color: var(--gray9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      position: relative;
+    }
+
+    .camera-white-top-bar button:hover {
+      background: var(--gray3);
+    }
+
+    .camera-white-top-bar button svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .camera-white-top-bar-center {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .flash-active-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--warning);
+      position: absolute;
+      top: 8px;
+      right: 8px;
+    }
+
+    /* --- Camera Viewfinder (centered, major ratio) --- */
+    .camera-viewfinder-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 var(--space-sm);
+      min-height: 0;
+    }
+
+    .camera-viewfinder-card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      background: #0d1117;
+    }
+
+    /* Simulated live camera feed */
+    .camera-feed-simulation {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 30% 40%, rgba(40,60,90,0.4) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 60%, rgba(60,40,30,0.3) 0%, transparent 50%),
+        linear-gradient(180deg, #0d1117 0%, #161b22 40%, #1a1e26 100%);
+    }
+
+    /* Focus indicator */
+    .focus-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 56px;
+      height: 56px;
+      border: 1.5px solid rgba(255,255,255,0.25);
+      border-radius: 4px;
+      opacity: 0.6;
+    }
+
+    /* Capture flash overlay */
+    .capture-flash {
+      position: absolute;
+      inset: 0;
+      background: white;
+      opacity: 0;
+      z-index: 20;
+      pointer-events: none;
+      border-radius: var(--radius-xl);
+    }
+
+    /* --- Zoom Controls (vertical pill, right side of viewfinder) --- */
+    .zoom-controls {
+      position: absolute;
+      right: 12px;
+      top: 40%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: var(--radius-full);
+      padding: 3px;
+      z-index: 6;
+    }
+
+    .zoom-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-full);
+      background: transparent;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: rgba(255,255,255,0.6);
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+
+    .zoom-btn:hover {
+      color: rgba(255,255,255,0.9);
+    }
+
+    .zoom-btn.active {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    /* --- Watermark Overlay (inside viewfinder) --- */
+    .watermark-rich-overlay {
+      position: absolute;
+      bottom: 16px;
+      left: var(--space-md);
+      right: var(--space-md);
+      z-index: 5;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .watermark-rich-content {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .watermark-rich-time-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .watermark-rich-time {
+      font-family: var(--font-heading);
+      font-size: 38px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      line-height: 1;
+      letter-spacing: -1px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+
+    .watermark-rich-date-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border-left: 2px solid rgba(255,255,255,0.35);
+      padding-left: 10px;
+    }
+
+    .watermark-rich-date {
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.3;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    }
+
+    .watermark-rich-day {
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.3;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    }
+
+    .watermark-rich-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.5px;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    }
+
+    .watermark-rich-address {
+      font-family: var(--font-sans);
+      font-size: 9px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.50);
+      letter-spacing: 0.3px;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+      margin-top: 1px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .watermark-rich-address svg {
+      width: 9px;
+      height: 9px;
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+
+    .watermark-edit-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-full);
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: rgba(255,255,255,0.6);
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+      margin-bottom: 2px;
+    }
+
+    .watermark-edit-btn:hover {
+      background: rgba(255,255,255,0.22);
+      color: white;
+    }
+
+    .watermark-edit-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* --- White Bottom Controls --- */
+    .camera-white-bottom {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-md) var(--space-lg) var(--space-xl);
+      background: var(--white);
+      flex-shrink: 0;
+      gap: var(--space-sm);
+    }
+
+    .bottom-controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .bottom-bar-side {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      min-width: 100px;
+    }
+
+    .bottom-bar-side.right {
+      justify-content: flex-end;
+    }
+
+    .bottom-bar-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      gap: 3px;
+    }
+
+    .bottom-bar-label {
+      font-family: var(--font-body);
+      font-size: 9px;
+      font-weight: 500;
+      color: var(--gray6);
+      text-align: center;
+      letter-spacing: 0.3px;
+    }
+
+    /* Gallery thumbnail (white theme) */
+    .gallery-thumb-white {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--gray3);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .gallery-thumb-white:hover {
+      transform: scale(1.05);
+      border-color: var(--gray5);
+    }
+
+    /* Gallery icon button (white theme) */
+    .gallery-icon-btn-white {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: var(--gray2);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--gray8);
+      transition: all 0.15s ease;
+    }
+
+    .gallery-icon-btn-white:hover {
+      background: var(--gray3);
+      color: var(--gray10);
+    }
+
+    .gallery-icon-btn-white svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Capture button (white theme - outlined style) */
+    .capture-btn-white {
+      width: var(--capture-button);
+      height: var(--capture-button);
+      border-radius: 50%;
+      border: 4px solid var(--color-primary);
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1);
+      flex-shrink: 0;
+    }
+
+    .capture-btn-white:active {
+      transform: scale(0.9);
+    }
+
+    .capture-btn-white-inner {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      transition: background 0.1s ease;
+    }
+
+    .capture-btn-white:active .capture-btn-white-inner {
+      background: var(--color-primary-dark);
+    }
+
+    /* Template button (white theme) */
+    .template-btn-white {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-full);
+      background: var(--gray2);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray8);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .template-btn-white:hover {
+      background: var(--gray3);
+      color: var(--gray10);
+    }
+
+    .template-btn-white svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* --- Project Selector Chip (above bottom bar) --- */
+    .project-selector-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px 5px 8px;
+      background: var(--gray2);
+      border: 1.5px solid var(--gray3);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      align-self: center;
+    }
+
+    .project-selector-chip:hover {
+      border-color: var(--color-accent);
+      background: rgba(25,118,210,0.06);
+    }
+
+    .project-selector-chip.has-project {
+      border-color: var(--color-accent);
+      background: rgba(25,118,210,0.06);
+    }
+
+    .project-selector-icon {
+      width: 16px;
+      height: 16px;
+      color: var(--gray5);
+      flex-shrink: 0;
+    }
+
+    .project-selector-chip.has-project .project-selector-icon {
+      color: var(--color-accent);
+    }
+
+    .project-selector-label {
+      font: var(--text-caption);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--gray6);
+      max-width: 160px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .project-selector-chip.has-project .project-selector-label {
+      color: var(--color-accent);
+    }
+
+    .project-selector-chevron {
+      width: 12px;
+      height: 12px;
+      color: var(--gray5);
+      flex-shrink: 0;
+    }
+
+    .project-selector-chip.has-project .project-selector-chevron {
+      color: var(--color-accent);
+    }
+
+    /* --- Project Picker Sheet --- */
+    .project-picker-container {
+      position: absolute;
+      inset: 0;
+      z-index: 40;
+    }
+
+    .project-picker-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      animation: fadeIn 0.2s ease forwards;
+    }
+
+    .project-picker-sheet {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--color-surface);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      padding: var(--space-md) var(--space-lg) var(--space-2xl);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      animation: slideUp 0.3s ease forwards;
+    }
+
+    .project-picker-handle {
+      width: 36px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--gray4);
+      align-self: center;
+    }
+
+    .project-picker-title {
+      font: var(--text-body1);
+      font-weight: 700;
+      color: var(--color-text);
+    }
+
+    .project-picker-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .project-picker-option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 8px var(--space-sm);
+      border-radius: var(--radius-md);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font: var(--text-body2);
+      font-size: 14px;
+      color: var(--color-text);
+      transition: background 0.15s ease;
+      width: 100%;
+      text-align: left;
+    }
+
+    .project-picker-option:hover {
+      background: var(--gray2);
+    }
+
+    .project-picker-option.active {
+      background: rgba(25,118,210,0.08);
+      color: var(--color-accent);
+    }
+
+    .project-picker-radio {
+      width: 16px;
+      height: 16px;
+      border-radius: var(--radius-full);
+      border: 2px solid var(--gray5);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .project-picker-option.active .project-picker-radio {
+      border-color: var(--color-accent);
+    }
+
+    .project-picker-option.active .project-picker-radio::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: var(--radius-full);
+      background: var(--color-accent);
+    }
+
+    .project-picker-option-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .project-picker-option-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .project-picker-option-meta {
+      font: var(--text-caption);
+      font-size: 11px;
+      color: var(--gray5);
+    }
+
+    .project-picker-option.active .project-picker-option-meta {
+      color: var(--color-accent);
+      opacity: 0.7;
+    }
+
+    /* --- Debug Drawer (reuse from components.css, override for white layout) --- */
+    .debug-drawer-container {
+      position: absolute;
+      inset: 0;
+      z-index: 50;
+    }
+  </style>
+</head>
+<body class="cjx-usage">
+  <div class="app-layout">
+    <nav class="sidebar hide-mobile"></nav>
+    <main class="main-content" data-cjx-entrance>
+
+      <div class="camera-layout">
+
+        <!-- White Top Bar: flash | flip | settings -->
+        <div class="camera-white-top-bar" data-cjx-entrance>
+          <button aria-label="Toggle flash" title="Flash On/Off">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
+            </svg>
+            <span class="flash-active-dot"></span>
+          </button>
+
+          <div class="camera-white-top-bar-center">
+            <button aria-label="Flip camera" title="Switch Front/Back">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 4v6h-6"/>
+                <path d="M1 20v-6h6"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+              </svg>
+            </button>
+          </div>
+
+          <button aria-label="Settings" title="Settings (long-press for debug)" data-settings-btn>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Camera Viewfinder (centered, takes major screen space) -->
+        <div class="camera-viewfinder-wrapper">
+          <div class="camera-viewfinder-card" data-cjx-entrance>
+            <div class="camera-feed-simulation"></div>
+            <div class="capture-flash"></div>
+            <div class="focus-indicator"></div>
+
+            <!-- Zoom controls (horizontal pill) -->
+            <div class="zoom-controls" data-cjx-entrance>
+              <button class="zoom-btn" title="0.5x wide">0.5</button>
+              <button class="zoom-btn active" title="1x zoom">1x</button>
+              <button class="zoom-btn" title="2x zoom">2</button>
+            </div>
+
+            <!-- Watermark overlay -->
+            <div class="watermark-rich-overlay" data-cjx-entrance>
+              <div class="watermark-rich-content">
+                <div class="watermark-rich-time-row">
+                  <span class="watermark-rich-time">21:54</span>
+                  <div class="watermark-rich-date-block">
+                    <span class="watermark-rich-date">15/02/2026</span>
+                    <span class="watermark-rich-day">Sun</span>
+                  </div>
+                </div>
+                <span class="watermark-rich-label">StampShot</span>
+                <span class="watermark-rich-address">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  84A Monash St, Sunshine VIC 3020
+                </span>
+              </div>
+              <button class="watermark-edit-btn" aria-label="Edit watermark" title="Edit watermark settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- White Bottom Controls -->
+        <div class="camera-white-bottom" data-cjx-entrance>
+
+          <!-- Project selector chip -->
+          <div class="project-selector-chip has-project" data-project-chip>
+            <svg class="project-selector-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span class="project-selector-label" data-project-label>Sunshine Office Renovation</span>
+            <svg class="project-selector-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6,9 12,15 18,9"/>
+            </svg>
+          </div>
+
+          <div class="bottom-controls-row">
+            <div class="bottom-bar-side">
+              <div class="bottom-bar-item">
+                <div class="gallery-thumb-white" title="Open Preview">
+                  <div style="width:100%;height:100%;background:linear-gradient(135deg,#1976D2,#42A5F5);"></div>
+                </div>
+                <span class="bottom-bar-label">Preview</span>
+              </div>
+              <div class="bottom-bar-item">
+                <button class="gallery-icon-btn-white" title="Open Gallery">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21,15 16,10 5,21"/>
+                  </svg>
+                </button>
+                <span class="bottom-bar-label">Gallery</span>
+              </div>
+            </div>
+
+            <button class="capture-btn-white" aria-label="Capture photo">
+              <div class="capture-btn-white-inner"></div>
+            </button>
+
+            <div class="bottom-bar-side right">
+              <div class="bottom-bar-item">
+                <button class="template-btn-white" aria-label="Watermark template">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="3" y1="9" x2="21" y2="9"/>
+                    <line x1="9" y1="21" x2="9" y2="9"/>
+                  </svg>
+                </button>
+                <span class="bottom-bar-label">Templates</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project Picker Sheet (hidden, shown on chip tap) -->
+        <div class="project-picker-container" style="display:none;" data-project-picker>
+          <div class="project-picker-backdrop" data-project-picker-backdrop></div>
+          <div class="project-picker-sheet">
+            <div class="project-picker-handle"></div>
+            <div class="project-picker-title">Capture to Project</div>
+            <div class="project-picker-list">
+              <button class="project-picker-option" data-project-id="none">
+                <span class="project-picker-radio"></span>
+                <div class="project-picker-option-info">
+                  <div class="project-picker-option-name">No Project</div>
+                  <div class="project-picker-option-meta">Save without project</div>
+                </div>
+              </button>
+              <button class="project-picker-option active" data-project-id="1">
+                <span class="project-picker-radio"></span>
+                <div class="project-picker-option-info">
+                  <div class="project-picker-option-name">Sunshine Office Renovation</div>
+                  <div class="project-picker-option-meta">12 photos</div>
+                </div>
+              </button>
+              <button class="project-picker-option" data-project-id="2">
+                <span class="project-picker-radio"></span>
+                <div class="project-picker-option-info">
+                  <div class="project-picker-option-name">Melbourne CBD Site Inspection</div>
+                  <div class="project-picker-option-meta">28 photos</div>
+                </div>
+              </button>
+              <button class="project-picker-option" data-project-id="3">
+                <span class="project-picker-radio"></span>
+                <div class="project-picker-option-info">
+                  <div class="project-picker-option-name">Footscray Road Maintenance</div>
+                  <div class="project-picker-option-meta">8 photos</div>
+                </div>
+              </button>
+              <button class="project-picker-option" data-project-id="4">
+                <span class="project-picker-radio"></span>
+                <div class="project-picker-option-info">
+                  <div class="project-picker-option-name">Werribee Kitchen Build</div>
+                  <div class="project-picker-option-meta">45 photos</div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Debug Drawer (hidden, shown on long-press settings) -->
+        <div class="debug-drawer-container" style="display:none;">
+          <div class="debug-drawer-backdrop"></div>
+          <div class="debug-drawer">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <h2 class="debug-drawer-title">Debug</h2>
+              <button class="icon-btn" data-close-debug aria-label="Close debug drawer" style="color:var(--color-text);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+
+            <button class="debug-btn danger" onclick="showToast('All photos deleted')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3,6 5,6 21,6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              Delete All Photos
+            </button>
+
+            <button class="debug-btn" onclick="showToast('Cache cleared')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/>
+                <line x1="18" y1="9" x2="12" y2="15"/>
+                <line x1="12" y1="9" x2="18" y2="15"/>
+              </svg>
+              Clear Cache
+            </button>
+
+            <button class="debug-btn" onclick="showToast('Storage info shown')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+              </svg>
+              Show Storage Info
+            </button>
+
+            <div style="margin-top:auto;padding-top:var(--space-md);border-top:1px solid var(--color-border);">
+              <div style="font:var(--text-caption);color:var(--color-text-soft);">
+                Raw: 12 files (48.2 MB)<br>
+                Processed: 12 files (36.1 MB)<br>
+                Temp: 3 files (8.4 MB)
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Toast -->
+      <div class="toast"></div>
+
+    </main>
+  </div>
+  <script src="interactions.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      /* Zoom button toggle */
+      var zoomBtns = document.querySelectorAll('.zoom-btn');
+      zoomBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          zoomBtns.forEach(function (otherBtn) {
+            otherBtn.classList.remove('active');
+          });
+          btn.classList.add('active');
+          if (window.showToast) {
+            window.showToast('Zoom: ' + btn.textContent.trim());
+          }
+        });
+      });
+
+      /* Edit watermark button */
+      var editBtn = document.querySelector('.watermark-edit-btn');
+      if (editBtn) {
+        editBtn.addEventListener('click', function () {
+          if (window.showToast) {
+            window.showToast('Opening watermark settings...');
+          }
+        });
+      }
+
+      /* Capture button spring animation (white version) */
+      var captureBtn = document.querySelector('.capture-btn-white');
+      if (captureBtn) {
+        captureBtn.addEventListener('click', function () {
+          captureBtn.style.transform = 'scale(0.88)';
+          setTimeout(function () {
+            captureBtn.style.transform = 'scale(1.05)';
+          }, 100);
+          setTimeout(function () {
+            captureBtn.style.transform = 'scale(1)';
+          }, 250);
+
+          var flash = document.querySelector('.capture-flash');
+          if (flash) {
+            flash.style.animation = 'none';
+            flash.offsetHeight;
+            flash.style.animation = 'captureFlash 0.3s ease-out';
+          }
+        });
+      }
+      /* Project picker */
+      var projectChip = document.querySelector('[data-project-chip]');
+      var projectLabel = document.querySelector('[data-project-label]');
+      var projectPicker = document.querySelector('[data-project-picker]');
+      var projectPickerBackdrop = document.querySelector('[data-project-picker-backdrop]');
+      var projectOptions = document.querySelectorAll('.project-picker-option');
+
+      function openProjectPicker() {
+        if (projectPicker) projectPicker.style.display = 'block';
+      }
+
+      function closeProjectPicker() {
+        if (projectPicker) projectPicker.style.display = 'none';
+      }
+
+      if (projectChip) projectChip.addEventListener('click', openProjectPicker);
+
+      if (projectPickerBackdrop) {
+        projectPickerBackdrop.addEventListener('click', closeProjectPicker);
+      }
+
+      projectOptions.forEach(function (option) {
+        option.addEventListener('click', function () {
+          projectOptions.forEach(function (otherOpt) {
+            otherOpt.classList.remove('active');
+          });
+          option.classList.add('active');
+
+          var projectId = option.getAttribute('data-project-id');
+          var nameEl = option.querySelector('.project-picker-option-name');
+          var name = nameEl ? nameEl.textContent : '';
+
+          if (projectId === 'none') {
+            projectChip.classList.remove('has-project');
+            projectLabel.textContent = 'No Project';
+          } else {
+            projectChip.classList.add('has-project');
+            projectLabel.textContent = name;
+          }
+
+          closeProjectPicker();
+          if (window.showToast) window.showToast('Project: ' + name);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,634 @@
+<!--
+  Screen: S-05 Projects List Screen (ProjectsListScreen.tsx) - P2
+  CJX Stage: Retention
+  FR Mapping: FR-14
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S-05 Projects List</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="components.css">
+  <style>
+    /* --- Project Card --- */
+    .project-card {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .project-card:hover {
+      background: var(--color-surface-hover);
+    }
+
+    .project-card:active {
+      background: var(--gray3);
+    }
+
+    .project-card-thumbnail {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .project-card-thumbnail-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .project-card-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .project-card-name {
+      font: var(--text-body1);
+      font-weight: 600;
+      color: var(--color-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .project-card-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font: var(--text-caption);
+      color: var(--color-text-soft);
+    }
+
+    .project-card-meta-dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--color-text-soft);
+      opacity: 0.5;
+    }
+
+    .project-card-address {
+      font: var(--text-caption);
+      color: var(--color-text-soft);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .project-card-address svg {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+      opacity: 0.6;
+    }
+
+    .project-card-chevron {
+      color: var(--color-text-soft);
+      opacity: 0.4;
+      flex-shrink: 0;
+    }
+
+    .project-card-chevron svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* --- Create Button (header) --- */
+    .create-btn {
+      width: var(--icon-button);
+      height: var(--icon-button);
+      border-radius: var(--radius-full);
+      background: var(--color-accent);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+
+    .create-btn:hover {
+      background: var(--color-primary-dark);
+    }
+
+    .create-btn:active {
+      transform: scale(0.92);
+    }
+
+    .create-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* --- Create Project Modal --- */
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 50;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      animation: fadeIn 0.2s ease forwards;
+    }
+
+    .modal-sheet {
+      width: 100%;
+      background: var(--color-surface);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      padding: var(--space-lg) var(--space-lg) var(--space-2xl);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+      animation: slideUp 0.3s ease forwards;
+      max-height: 70%;
+    }
+
+    .modal-handle {
+      width: 36px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--gray4);
+      align-self: center;
+      margin-bottom: var(--space-sm);
+    }
+
+    .modal-title {
+      font: var(--text-h3);
+      color: var(--color-text);
+    }
+
+    .modal-field {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .modal-field-label {
+      font: var(--text-caption);
+      font-weight: 600;
+      color: var(--color-text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .modal-location-auto {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      background: rgba(25,118,210,0.08);
+      border-radius: var(--radius-md);
+      font: var(--text-caption);
+      color: var(--color-accent);
+    }
+
+    .modal-location-auto svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: var(--space-sm);
+      margin-top: var(--space-sm);
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      border: none;
+      font: var(--text-button);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+
+    .modal-btn-cancel {
+      background: var(--gray3);
+      color: var(--color-text);
+    }
+
+    .modal-btn-cancel:hover {
+      background: var(--gray4);
+    }
+
+    .modal-btn-confirm {
+      background: var(--color-accent);
+      color: white;
+    }
+
+    .modal-btn-confirm:hover {
+      background: var(--color-primary-dark);
+    }
+
+    /* --- Search Box --- */
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin: var(--space-sm) var(--space-lg);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--gray2);
+      border-radius: var(--radius-md);
+      border: 1.5px solid transparent;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .search-box:focus-within {
+      border-color: var(--color-accent);
+      background: var(--color-surface);
+    }
+
+    .search-box-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--gray6);
+      flex-shrink: 0;
+    }
+
+    .search-box-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font: var(--text-body2);
+      color: var(--color-text);
+      outline: none;
+    }
+
+    .search-box-input::placeholder {
+      color: var(--gray5);
+    }
+
+    .search-box-clear {
+      width: 18px;
+      height: 18px;
+      border: none;
+      background: var(--gray4);
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--gray7);
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .search-box-clear.visible {
+      display: flex;
+    }
+
+    .search-box-clear svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    /* No results state */
+    .search-no-results {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-2xl) var(--space-lg);
+      gap: var(--space-sm);
+      color: var(--color-text-soft);
+    }
+
+    .search-no-results.visible {
+      display: flex;
+    }
+
+    .search-no-results svg {
+      width: 40px;
+      height: 40px;
+      opacity: 0.3;
+    }
+
+    .search-no-results-text {
+      font: var(--text-body2);
+      color: var(--gray5);
+    }
+  </style>
+</head>
+<body class="cjx-retention">
+  <div class="app-layout">
+    <nav class="sidebar hide-mobile"></nav>
+    <main class="main-content" data-cjx-entrance>
+
+      <!-- Header: "Back" button | "Projects" title | "+" create button -->
+      <header class="screen-header" data-cjx-entrance>
+        <button class="back-btn" aria-label="Go back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15,18 9,12 15,6"/>
+          </svg>
+        </button>
+        <h1 class="screen-header-center">Projects</h1>
+        <button class="create-btn" aria-label="Create project" data-create-project-btn>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+      </header>
+
+      <!-- Search box -->
+      <div class="search-box" data-cjx-entrance>
+        <svg class="search-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input class="search-box-input" type="text" placeholder="Search projects..." data-search-input>
+        <button class="search-box-clear" aria-label="Clear search" data-search-clear>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- No results state -->
+      <div class="search-no-results" data-search-no-results>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <span class="search-no-results-text">No projects found</span>
+      </div>
+
+      <!-- Content: scrollable list of project cards -->
+      <div class="scroll-content">
+
+        <!-- Project 1 -->
+        <div class="project-card" data-cjx-entrance>
+          <div class="project-card-thumbnail">
+            <div class="project-card-thumbnail-img" style="background:linear-gradient(135deg,#1a2a3a,#2a4a6a);"></div>
+          </div>
+          <div class="project-card-info">
+            <div class="project-card-name">Sunshine Office Renovation</div>
+            <div class="project-card-meta">
+              <span>12 photos</span>
+              <span class="project-card-meta-dot"></span>
+              <span>Feb 14, 2026</span>
+            </div>
+            <div class="project-card-address">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              84A Monash St, Sunshine VIC 3020
+            </div>
+          </div>
+          <div class="project-card-chevron">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9,18 15,12 9,6"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Project 2 -->
+        <div class="project-card" data-cjx-entrance>
+          <div class="project-card-thumbnail">
+            <div class="project-card-thumbnail-img" style="background:linear-gradient(135deg,#2a1a3a,#5a3a7a);"></div>
+          </div>
+          <div class="project-card-info">
+            <div class="project-card-name">Melbourne CBD Site Inspection</div>
+            <div class="project-card-meta">
+              <span>28 photos</span>
+              <span class="project-card-meta-dot"></span>
+              <span>Feb 10, 2026</span>
+            </div>
+            <div class="project-card-address">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              120 Collins St, Melbourne VIC 3000
+            </div>
+          </div>
+          <div class="project-card-chevron">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9,18 15,12 9,6"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Project 3 -->
+        <div class="project-card" data-cjx-entrance>
+          <div class="project-card-thumbnail">
+            <div class="project-card-thumbnail-img" style="background:linear-gradient(135deg,#3a2a1a,#7a5a3a);"></div>
+          </div>
+          <div class="project-card-info">
+            <div class="project-card-name">Footscray Road Maintenance</div>
+            <div class="project-card-meta">
+              <span>8 photos</span>
+              <span class="project-card-meta-dot"></span>
+              <span>Feb 5, 2026</span>
+            </div>
+            <div class="project-card-address">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              45 Footscray Rd, Seddon VIC 3011
+            </div>
+          </div>
+          <div class="project-card-chevron">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9,18 15,12 9,6"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Project 4 -->
+        <div class="project-card" data-cjx-entrance>
+          <div class="project-card-thumbnail">
+            <div class="project-card-thumbnail-img" style="background:linear-gradient(135deg,#1a3a2a,#3a7a5a);"></div>
+          </div>
+          <div class="project-card-info">
+            <div class="project-card-name">Werribee Kitchen Build</div>
+            <div class="project-card-meta">
+              <span>45 photos</span>
+              <span class="project-card-meta-dot"></span>
+              <span>Jan 28, 2026</span>
+            </div>
+            <div class="project-card-address">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              10 Watton St, Werribee VIC 3030
+            </div>
+          </div>
+          <div class="project-card-chevron">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9,18 15,12 9,6"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Project 5 -->
+        <div class="project-card" data-cjx-entrance>
+          <div class="project-card-thumbnail">
+            <div class="project-card-thumbnail-img" style="background:linear-gradient(135deg,#3a1a1a,#7a3a3a);"></div>
+          </div>
+          <div class="project-card-info">
+            <div class="project-card-name">Geelong Deck Extension</div>
+            <div class="project-card-meta">
+              <span>19 photos</span>
+              <span class="project-card-meta-dot"></span>
+              <span>Jan 15, 2026</span>
+            </div>
+            <div class="project-card-address">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              22 Ryrie St, Geelong VIC 3220
+            </div>
+          </div>
+          <div class="project-card-chevron">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9,18 15,12 9,6"/>
+            </svg>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Create Project Modal (hidden, shown on "+" tap) -->
+      <div class="modal-container" style="display:none;" data-create-modal>
+        <div class="modal-backdrop" data-modal-backdrop>
+          <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <h2 class="modal-title">New Project</h2>
+
+            <div class="modal-field">
+              <label class="modal-field-label">Name</label>
+              <input type="text" class="text-input" placeholder="e.g. Kitchen Renovation" value="">
+            </div>
+
+            <div class="modal-field">
+              <label class="modal-field-label">Description</label>
+              <input type="text" class="text-input" placeholder="Optional description" value="">
+            </div>
+
+            <div class="modal-field">
+              <label class="modal-field-label">Location</label>
+              <div class="modal-location-auto">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                Auto-filled: 84A Monash St, Sunshine VIC 3020
+              </div>
+            </div>
+
+            <div class="modal-actions">
+              <button class="modal-btn modal-btn-cancel" data-modal-cancel>Cancel</button>
+              <button class="modal-btn modal-btn-confirm" data-modal-confirm>Create</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toast -->
+      <div class="toast"></div>
+
+    </main>
+  </div>
+  <script src="interactions.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var createBtn = document.querySelector('[data-create-project-btn]');
+      var modalContainer = document.querySelector('[data-create-modal]');
+      var modalBackdrop = document.querySelector('[data-modal-backdrop]');
+      var modalCancel = document.querySelector('[data-modal-cancel]');
+      var modalConfirm = document.querySelector('[data-modal-confirm]');
+
+      function openModal() {
+        if (modalContainer) modalContainer.style.display = 'block';
+      }
+
+      function closeModal() {
+        if (modalContainer) modalContainer.style.display = 'none';
+      }
+
+      if (createBtn) createBtn.addEventListener('click', openModal);
+      if (modalCancel) modalCancel.addEventListener('click', closeModal);
+      if (modalConfirm) {
+        modalConfirm.addEventListener('click', function () {
+          closeModal();
+          if (window.showToast) window.showToast('Project created');
+        });
+      }
+      if (modalBackdrop) {
+        modalBackdrop.addEventListener('click', function (event) {
+          if (event.target === modalBackdrop) closeModal();
+        });
+      }
+
+      /* Project card tap */
+      var projectCards = document.querySelectorAll('.project-card');
+      projectCards.forEach(function (card) {
+        card.addEventListener('click', function () {
+          if (window.showToast) window.showToast('Navigate to Project Detail');
+        });
+      });
+
+      /* Search filtering */
+      var searchInput = document.querySelector('[data-search-input]');
+      var searchClear = document.querySelector('[data-search-clear]');
+      var noResults = document.querySelector('[data-search-no-results]');
+      var allCards = document.querySelectorAll('.project-card');
+
+      function filterProjects() {
+        var query = searchInput.value.toLowerCase().trim();
+        var visibleCount = 0;
+
+        searchClear.classList.toggle('visible', query.length > 0);
+
+        allCards.forEach(function (card) {
+          var nameEl = card.querySelector('.project-card-name');
+          var name = nameEl ? nameEl.textContent.toLowerCase() : '';
+          var matches = name.indexOf(query) !== -1;
+          card.style.display = matches ? '' : 'none';
+          if (matches) visibleCount++;
+        });
+
+        noResults.classList.toggle('visible', visibleCount === 0 && query.length > 0);
+      }
+
+      if (searchInput) {
+        searchInput.addEventListener('input', filterProjects);
+      }
+
+      if (searchClear) {
+        searchClear.addEventListener('click', function () {
+          searchInput.value = '';
+          filterProjects();
+          searchInput.focus();
+        });
+      }
+    });
+  </script>
+</body>
+</html>

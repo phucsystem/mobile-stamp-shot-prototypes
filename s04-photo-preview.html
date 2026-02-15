@@ -1,0 +1,169 @@
+<!--
+  Screen: S-04 Photo Preview Screen (PhotoPreviewScreen.tsx)
+  CJX Stage: Usage
+  FR Mapping: FR-09
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S-04 Photo Preview</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="components.css">
+  <style>
+    /* Simulated processed photo with overlays */
+    .preview-photo {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-background);
+      overflow: hidden;
+    }
+    .preview-photo-image {
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(ellipse at 35% 35%, rgba(40,80,120,0.5) 0%, transparent 50%),
+        radial-gradient(ellipse at 65% 55%, rgba(80,60,40,0.4) 0%, transparent 45%),
+        radial-gradient(ellipse at 50% 80%, rgba(30,50,30,0.3) 0%, transparent 40%),
+        linear-gradient(180deg, #0d1520 0%, #1a2530 40%, #15201a 100%);
+      object-fit: contain;
+    }
+    /* Simulated timestamp overlay on the photo */
+    .preview-timestamp {
+      position: absolute;
+      bottom: 24px;
+      right: 16px;
+      font: var(--text-mono);
+      font-size: 11px;
+      color: rgba(255,255,255,0.8);
+      background: rgba(0,0,0,0.5);
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+    }
+    /* Simulated watermark on the photo */
+    .preview-watermark {
+      position: absolute;
+      bottom: 24px;
+      left: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font: var(--text-mono);
+      color: rgba(255,255,255,0.6);
+      background: rgba(0,0,0,0.4);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+    }
+    .preview-watermark-time {
+      font-size: 16px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+    }
+    .preview-watermark-date {
+      font-size: 9px;
+      color: rgba(255,255,255,0.5);
+    }
+    .preview-watermark-label {
+      font-size: 10px;
+      color: rgba(255,255,255,0.5);
+    }
+    /* Action bar */
+    .preview-action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: var(--space-md) var(--space-lg) var(--space-2xl);
+      background: var(--color-background);
+      flex-shrink: 0;
+      border-top: 1px solid var(--color-border);
+    }
+
+    /* Unified button color */
+    .preview-action-bar .action-btn .action-btn-icon {
+      background: var(--gray2);
+      color: var(--gray9);
+    }
+    .preview-action-bar .action-btn .action-btn-label {
+      color: var(--gray8);
+    }
+  </style>
+</head>
+<body class="cjx-usage">
+  <div class="app-layout">
+    <nav class="sidebar hide-mobile"></nav>
+    <main class="main-content" data-cjx-entrance>
+
+      <!-- Header: centered "Preview" title -->
+      <header class="screen-header" data-cjx-entrance>
+        <div style="width:var(--icon-button);"></div>
+        <h1 class="screen-header-center">Preview</h1>
+        <div style="width:var(--icon-button);"></div>
+      </header>
+
+      <!-- Content: full-screen processed photo (contain mode) -->
+      <div class="preview-photo" data-cjx-entrance>
+        <div class="preview-photo-image"></div>
+
+        <!-- Watermark overlay (full style - large time + date + label) -->
+        <div class="preview-watermark">
+          <div class="preview-watermark-time">14:30</div>
+          <div class="preview-watermark-date">Feb 15, 2026</div>
+          <div class="preview-watermark-label">StampShot</div>
+        </div>
+
+        <!-- Timestamp overlay -->
+        <div class="preview-timestamp">2026-02-15T14:30:22+11:00</div>
+      </div>
+
+      <!-- Bottom bar: Discard | Share | Keep (unified neutral color) -->
+      <div class="preview-action-bar" data-cjx-entrance>
+
+        <!-- Discard button -->
+        <button class="action-btn discard" onclick="if(confirm('Discard this photo?')){showToast('Photo discarded')}">
+          <div class="action-btn-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3,6 5,6 21,6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              <line x1="10" y1="11" x2="10" y2="17"/>
+              <line x1="14" y1="11" x2="14" y2="17"/>
+            </svg>
+          </div>
+          <span class="action-btn-label">Discard</span>
+        </button>
+
+        <!-- Share button -->
+        <button class="action-btn share" onclick="showToast('Share sheet opened')">
+          <div class="action-btn-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+              <polyline points="16,6 12,2 8,6"/>
+              <line x1="12" y1="2" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <span class="action-btn-label">Share</span>
+        </button>
+
+        <!-- Keep button -->
+        <button class="action-btn keep" onclick="showToast('Photo saved to camera roll')">
+          <div class="action-btn-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20,6 9,17 4,12"/>
+            </svg>
+          </div>
+          <span class="action-btn-label">Keep</span>
+        </button>
+
+      </div>
+
+      <!-- Toast -->
+      <div class="toast"></div>
+
+    </main>
+  </div>
+  <script src="interactions.js"></script>
+</body>
+</html>

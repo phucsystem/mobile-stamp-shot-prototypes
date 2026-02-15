@@ -1,0 +1,484 @@
+<!--
+  Screen: S-03 Settings Screen (SettingsScreen.tsx)
+  CJX Stage: Retention
+  FR Mapping: FR-10, FR-13
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S-03 Settings</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="components.css">
+  <style>
+    .settings-scroll {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-sm) 0;
+    }
+    .settings-row-label {
+      font: var(--text-body2);
+      color: var(--color-text);
+    }
+    .settings-sub-section {
+      padding-left: var(--space-md);
+      margin-top: var(--space-sm);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .settings-sub-section.hidden { display: none; }
+    .settings-version-info {
+      text-align: center;
+      padding: var(--space-xl) var(--space-lg);
+      color: var(--color-text-soft);
+      font: var(--text-caption);
+    }
+    .position-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-xs);
+    }
+    .position-option {
+      padding: var(--space-sm);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      cursor: pointer;
+      font: var(--text-caption);
+      font-weight: 500;
+      color: var(--color-text-soft);
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .position-option:hover { border-color: var(--color-accent); color: var(--color-text); }
+    .position-option.active {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+      background: rgba(25,118,210,0.1);
+    }
+
+    /* --- Collapsible Section Accordion --- */
+    .collapsible-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-md) var(--space-lg) var(--space-xs);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .collapsible-header:active {
+      opacity: 0.7;
+    }
+
+    .collapsible-header .section-title {
+      margin-bottom: 0;
+    }
+
+    .collapsible-chevron {
+      width: 18px;
+      height: 18px;
+      color: var(--gray6);
+      transition: transform 0.25s ease;
+      flex-shrink: 0;
+    }
+
+    .collapsible-section.collapsed .collapsible-chevron {
+      transform: rotate(-90deg);
+    }
+
+    .collapsible-body {
+      padding: 0 var(--space-lg) var(--space-sm);
+      overflow: hidden;
+      max-height: 800px;
+      transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease;
+      opacity: 1;
+    }
+
+    .collapsible-section.collapsed .collapsible-body {
+      max-height: 0;
+      opacity: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    /* Summary value shown when collapsed */
+    .collapsible-summary {
+      font: var(--text-caption);
+      color: var(--color-accent);
+      margin-left: auto;
+      margin-right: var(--space-sm);
+      white-space: nowrap;
+    }
+
+    .collapsible-section:not(.collapsed) .collapsible-summary {
+      display: none;
+    }
+
+    /* Divider between sections */
+    .section-divider {
+      height: 1px;
+      background: var(--color-border);
+      margin: 0 var(--space-lg);
+    }
+  </style>
+</head>
+<body class="cjx-retention">
+  <div class="app-layout">
+    <nav class="sidebar hide-mobile"></nav>
+    <main class="main-content" data-cjx-entrance>
+
+      <!-- Header -->
+      <header class="screen-header" data-cjx-entrance>
+        <button class="back-btn" aria-label="Go back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15,18 9,12 15,6"/>
+          </svg>
+        </button>
+        <h1 class="screen-header-center">Settings</h1>
+        <div style="width:var(--icon-button);"></div>
+      </header>
+
+      <div class="settings-scroll">
+
+        <!-- OVERLAY DEFAULTS (collapsed by default) -->
+        <section class="collapsible-section collapsed" data-cjx-entrance>
+          <div class="collapsible-header" data-collapse-toggle>
+            <h2 class="section-title">Overlay Defaults</h2>
+            <span class="collapsible-summary">ISO 8601</span>
+            <svg class="collapsible-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6,9 12,15 18,9"/>
+            </svg>
+          </div>
+          <div class="collapsible-body">
+            <div class="settings-list">
+              <div class="settings-item">
+                <span class="settings-item-label">Timestamp Format</span>
+                <div class="settings-item-right">
+                  <span class="settings-value">ISO 8601</span>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:var(--space-sm);">
+              <div class="picker-group">
+                <button class="picker-option active">ISO 8601</button>
+                <button class="picker-option">Unix</button>
+                <button class="picker-option">Custom</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- WATERMARK (expanded by default - most used) -->
+        <section class="collapsible-section" data-cjx-entrance>
+          <div class="collapsible-header" data-collapse-toggle>
+            <h2 class="section-title">Watermark</h2>
+            <span class="collapsible-summary">On</span>
+            <svg class="collapsible-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6,9 12,15 18,9"/>
+            </svg>
+          </div>
+          <div class="collapsible-body">
+            <div class="settings-list">
+              <div class="settings-item">
+                <span class="settings-item-label">Enable Watermark</span>
+                <div class="settings-item-right">
+                  <button class="toggle-switch active" aria-label="Toggle watermark" id="watermarkToggle"></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-sub-section" id="watermarkSettings">
+
+              <!-- Template selector -->
+              <div style="margin-top:var(--space-sm);display:flex;flex-direction:column;gap:var(--space-sm);">
+                <div class="settings-row-label" style="font:var(--text-overline);color:var(--color-text-soft);text-transform:uppercase;letter-spacing:1px;">Template</div>
+                <div style="display:flex;gap:var(--space-sm);overflow-x:auto;padding-bottom:var(--space-xs);">
+                  <div class="template-card active" style="min-width:140px;">
+                    <div class="template-card-preview" style="font-size:9px;line-height:1.3;">
+                      14:30<br>Feb 15
+                    </div>
+                    <div class="template-card-info">
+                      <div class="template-card-name">Default</div>
+                      <div class="template-card-desc">Text + DateTime</div>
+                    </div>
+                  </div>
+                  <div class="template-card" style="min-width:140px;">
+                    <div class="template-card-preview">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:20px;height:20px;color:var(--color-text-soft);">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="12" x2="16" y2="12"/>
+                      </svg>
+                    </div>
+                    <div class="template-card-info">
+                      <div class="template-card-name">Minimal</div>
+                      <div class="template-card-desc">Time only</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Type picker -->
+              <div style="margin-top:var(--space-sm);">
+                <div class="settings-row-label" style="font:var(--text-overline);color:var(--color-text-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:var(--space-xs);">Type</div>
+                <div class="picker-group">
+                  <button class="picker-option">Text</button>
+                  <button class="picker-option">Logo</button>
+                  <button class="picker-option active">Both</button>
+                </div>
+              </div>
+
+              <!-- Text input -->
+              <div style="margin-top:var(--space-sm);">
+                <div class="settings-row-label" style="font:var(--text-overline);color:var(--color-text-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:var(--space-xs);">Text</div>
+                <input type="text" class="text-input" value="StampShot" placeholder="Watermark text">
+              </div>
+
+              <!-- Show DateTime toggle -->
+              <div class="settings-row" style="margin-top:var(--space-sm);">
+                <span class="settings-row-label">Show DateTime</span>
+                <button class="toggle-switch active" aria-label="Toggle DateTime"></button>
+              </div>
+
+              <!-- DateTime style picker -->
+              <div style="margin-top:var(--space-xs);">
+                <div class="settings-row-label" style="font:var(--text-overline);color:var(--color-text-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:var(--space-xs);">DateTime Style</div>
+                <div class="picker-group">
+                  <button class="picker-option active">Full</button>
+                  <button class="picker-option">Inline</button>
+                </div>
+              </div>
+
+              <!-- Size picker -->
+              <div style="margin-top:var(--space-sm);">
+                <div class="settings-row-label" style="font:var(--text-overline);color:var(--color-text-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:var(--space-xs);">Size</div>
+                <div class="picker-group">
+                  <button class="picker-option">5%</button>
+                  <button class="picker-option active">10%</button>
+                  <button class="picker-option">15%</button>
+                  <button class="picker-option">20%</button>
+                </div>
+              </div>
+
+              <!-- Position picker -->
+              <div style="margin-top:var(--space-sm);">
+                <div class="settings-row-label" style="font:var(--text-overline);color:var(--color-text-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:var(--space-xs);">Position</div>
+                <div class="position-grid">
+                  <button class="position-option">Top Left</button>
+                  <button class="position-option">Top Right</button>
+                  <button class="position-option active">Bottom Left</button>
+                  <button class="position-option">Bottom Right</button>
+                </div>
+              </div>
+
+              <!-- Opacity slider -->
+              <div style="margin-top:var(--space-sm);">
+                <div class="settings-row" style="margin-bottom:var(--space-xs);">
+                  <span class="settings-row-label" style="font:var(--text-overline);color:var(--color-text-soft);text-transform:uppercase;letter-spacing:1px;">Opacity</span>
+                  <span class="slider-value">60%</span>
+                </div>
+                <div class="slider-container">
+                  <div class="slider-track">
+                    <div class="slider-fill" style="width:60%;"></div>
+                    <div class="slider-thumb" style="left:60%;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Color picker -->
+              <div style="margin-top:var(--space-sm);">
+                <div class="settings-row-label" style="font:var(--text-overline);color:var(--color-text-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:var(--space-xs);">Color</div>
+                <div class="color-picker-grid">
+                  <div class="color-swatch active" style="background:#ffffff;"></div>
+                  <div class="color-swatch" style="background:#000000;border:1px solid var(--color-border);"></div>
+                  <div class="color-swatch" style="background:#ef4444;"></div>
+                  <div class="color-swatch" style="background:#f97316;"></div>
+                  <div class="color-swatch" style="background:#eab308;"></div>
+                  <div class="color-swatch" style="background:#22c55e;"></div>
+                  <div class="color-swatch" style="background:#3b82f6;"></div>
+                  <div class="color-swatch" style="background:#8b5cf6;"></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- LOCATION (collapsed) -->
+        <section class="collapsible-section collapsed" data-cjx-entrance>
+          <div class="collapsible-header" data-collapse-toggle>
+            <h2 class="section-title">Location</h2>
+            <span class="collapsible-summary">On</span>
+            <svg class="collapsible-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6,9 12,15 18,9"/>
+            </svg>
+          </div>
+          <div class="collapsible-body">
+            <div class="settings-list">
+              <div class="settings-item">
+                <span class="settings-item-label">Enable Location</span>
+                <div class="settings-item-right">
+                  <button class="toggle-switch active" aria-label="Toggle location"></button>
+                </div>
+              </div>
+              <div class="settings-item" style="cursor:default;">
+                <span class="settings-item-label">Permission</span>
+                <div class="settings-item-right">
+                  <span class="settings-value" style="color:var(--color-success);">Granted</span>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:var(--space-xs);">
+              <span style="font:var(--text-caption);color:var(--color-text-soft);">Address shown on watermark when enabled. GPS captured at photo time only.</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- CAPTURE DEFAULTS (collapsed) -->
+        <section class="collapsible-section collapsed" data-cjx-entrance>
+          <div class="collapsible-header" data-collapse-toggle>
+            <h2 class="section-title">Capture Defaults</h2>
+            <span class="collapsible-summary">JPG</span>
+            <svg class="collapsible-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6,9 12,15 18,9"/>
+            </svg>
+          </div>
+          <div class="collapsible-body">
+            <div class="settings-list">
+              <div class="settings-item">
+                <span class="settings-item-label">Save Format</span>
+                <div class="settings-item-right">
+                  <span class="settings-value">JPG</span>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:var(--space-sm);">
+              <div class="picker-group">
+                <button class="picker-option active">JPG</button>
+                <button class="picker-option">HEIC</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- APPEARANCE (collapsed) -->
+        <section class="collapsible-section collapsed" data-cjx-entrance>
+          <div class="collapsible-header" data-collapse-toggle>
+            <h2 class="section-title">Appearance</h2>
+            <span class="collapsible-summary">Light</span>
+            <svg class="collapsible-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6,9 12,15 18,9"/>
+            </svg>
+          </div>
+          <div class="collapsible-body">
+            <div class="settings-list">
+              <div class="settings-item">
+                <span class="settings-item-label">Theme</span>
+                <div class="settings-item-right">
+                  <span class="settings-value">Light</span>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:var(--space-sm);">
+              <div class="picker-group">
+                <button class="picker-option">System</button>
+                <button class="picker-option active">Light</button>
+                <button class="picker-option">Dark</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- ABOUT (collapsed) -->
+        <section class="collapsible-section collapsed" data-cjx-entrance>
+          <div class="collapsible-header" data-collapse-toggle>
+            <h2 class="section-title">About</h2>
+            <span class="collapsible-summary">v0.0.1</span>
+            <svg class="collapsible-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6,9 12,15 18,9"/>
+            </svg>
+          </div>
+          <div class="collapsible-body">
+            <div class="settings-list">
+              <div class="settings-item" style="cursor:default;">
+                <span class="settings-item-label">Version</span>
+                <div class="settings-item-right">
+                  <span class="settings-value">0.0.1</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="settings-version-info" data-cjx-entrance>
+          StampShot v0.0.1<br>
+          React Native 0.82.1
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+  <script src="interactions.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+      /* Collapsible section toggle */
+      var collapseToggles = document.querySelectorAll('[data-collapse-toggle]');
+      collapseToggles.forEach(function (header) {
+        header.addEventListener('click', function (event) {
+          /* Don't collapse if clicking a toggle switch inside the header */
+          if (event.target.closest('.toggle-switch')) return;
+
+          var section = header.closest('.collapsible-section');
+          if (section) {
+            section.classList.toggle('collapsed');
+          }
+        });
+      });
+
+      /* Watermark toggle to show/hide sub-settings */
+      var watermarkToggle = document.getElementById('watermarkToggle');
+      var watermarkSettings = document.getElementById('watermarkSettings');
+
+      if (watermarkToggle && watermarkSettings) {
+        watermarkToggle.addEventListener('click', function () {
+          var isActive = watermarkToggle.classList.contains('active');
+          watermarkSettings.classList.toggle('hidden', isActive);
+        });
+      }
+
+      /* Position picker toggle */
+      var positionOptions = document.querySelectorAll('.position-option');
+      positionOptions.forEach(function (option) {
+        option.addEventListener('click', function () {
+          positionOptions.forEach(function (otherOpt) {
+            otherOpt.classList.remove('active');
+          });
+          option.classList.add('active');
+        });
+      });
+    });
+  </script>
+</body>
+</html>

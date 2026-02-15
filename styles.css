@@ -1,0 +1,348 @@
+/* ==========================================================================
+   StampShot - Design Tokens from UI_SPEC.md
+   Adapted from mobile-app-design-systems styling
+   ========================================================================== */
+
+/* --- Reset --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* --- Base Colors --- */
+  --white: #FFFFFF;
+  --black: #000000;
+  --gray1: #FAFAFA;
+  --gray2: #F5F5F5;
+  --gray3: #EEEEEE;
+  --gray4: #E0E0E0;
+  --gray5: #BDBDBD;
+  --gray6: #9E9E9E;
+  --gray7: #757575;
+  --gray8: #616161;
+  --gray9: #424242;
+  --gray10: #212121;
+
+  /* --- Primary Colors --- */
+  --color-primary: #1976D2;
+  --color-primary-light: #42A5F5;
+  --color-primary-dark: #1565C0;
+  --color-primary-bg: #E3F2FD;
+
+  /* --- Semantic Colors --- */
+  --color-success: #388E3C;
+  --color-warning: #F9A825;
+  --color-error: #D32F2F;
+  --color-info: #0288D1;
+  --success: #388E3C;
+  --danger: #D32F2F;
+  --warning: #F9A825;
+
+  /* --- Active Theme (white + blue) --- */
+  --color-background: #FFFFFF;
+  --color-background-soft: #F5F5F5;
+  --color-surface: #FFFFFF;
+  --color-surface-hover: #F5F5F5;
+  --color-text: #212121;
+  --color-text-soft: #757575;
+  --color-border: #E0E0E0;
+  --color-accent: #1976D2;
+  --color-card-bg: #FFFFFF;
+  --color-overlay: rgba(0,0,0,0.5);
+  --color-shadow: rgba(0,0,0,0.12);
+
+  /* --- Typography (from UI_SPEC) --- */
+  --font-heading: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Roboto', sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Roboto', sans-serif;
+  --font-mono: 'Menlo', 'SF Mono', 'Roboto Mono', monospace;
+
+  /* Type Scale (UI_SPEC: 12, 14, 16, 18, 20, 24, 32, 40px) */
+  --text-h1: 700 28px/34px var(--font-heading);
+  --text-h2: 600 24px/30px var(--font-heading);
+  --text-h3: 600 20px/26px var(--font-heading);
+  --text-h4: 500 18px/24px var(--font-heading);
+  --text-body1: 400 16px/24px var(--font-body);
+  --text-body2: 400 14px/20px var(--font-body);
+  --text-caption: 400 12px/16px var(--font-body);
+  --text-button: 500 16px/20px var(--font-body);
+  --text-overline: 600 11px/16px var(--font-body);
+  --text-mono: 400 13px/18px var(--font-mono);
+
+  /* Spacing Scale (UI_SPEC) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Size Tokens (UI_SPEC) */
+  --capture-button: 72px;
+  --capture-button-inner: 64px;
+  --icon-button: 44px;
+  --thumbnail: 60px;
+  --header-height: 56px;
+  --tab-bar-height: 80px;
+
+  /* Border Radius (UI_SPEC) */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px var(--color-shadow);
+  --shadow-md: 0 4px 12px var(--color-shadow);
+  --shadow-lg: 0 8px 24px var(--color-shadow);
+
+  /* Layout */
+  --mobile-width: 390px;
+  --mobile-height: 844px;
+}
+
+html {
+  font: var(--text-body1);
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: #E8ECF0;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: var(--space-lg);
+}
+
+/* --- Mobile Frame --- */
+.app-layout {
+  width: var(--mobile-width);
+  height: var(--mobile-height);
+  background: var(--color-background);
+  border-radius: 44px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.04),
+    0 20px 60px rgba(0,0,0,0.15),
+    0 8px 20px rgba(0,0,0,0.08);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* --- Sidebar (hidden on mobile) --- */
+.sidebar.hide-mobile {
+  display: none;
+}
+
+/* --- Scrollable Content --- */
+.scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* --- Header --- */
+.screen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-background);
+  min-height: var(--header-height);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.screen-header-title {
+  font: var(--text-h3);
+  color: var(--color-text);
+}
+
+.screen-header-center {
+  font: var(--text-h3);
+  color: var(--color-text);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* --- Back Button --- */
+.back-btn {
+  width: var(--icon-button);
+  height: var(--icon-button);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  color: var(--color-text);
+  transition: background 0.15s ease;
+}
+
+.back-btn:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.back-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* --- Icon Buttons --- */
+.icon-btn {
+  width: var(--icon-button);
+  height: var(--icon-button);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  color: var(--color-text);
+  transition: background 0.15s ease;
+}
+
+.icon-btn:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.icon-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* --- Section --- */
+.section {
+  padding: var(--space-md) var(--space-lg);
+}
+
+.section-title {
+  font: var(--text-overline);
+  color: var(--color-text-soft);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: var(--space-sm);
+}
+
+/* --- Prototype Navigation Sidebar --- */
+.proto-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 8px;
+  background: rgba(24, 24, 27, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 9999;
+  font-family: var(--font-body);
+  box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.proto-nav-version {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 8px 10px 4px;
+}
+
+.proto-nav-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 12px 10px 4px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin-top: 4px;
+}
+
+.proto-nav-label:first-of-type {
+  border-top: none;
+  margin-top: 0;
+}
+
+.proto-nav a {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  padding: 7px 10px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  display: block;
+}
+
+.proto-nav a:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.1);
+}
+
+.proto-nav a.active {
+  color: #fff;
+  background: var(--color-accent);
+}
+
+body {
+  padding-left: 180px !important;
+  padding-top: 0 !important;
+}
+
+/* --- CJX Animations --- */
+.cjx-usage [data-cjx-entrance] {
+  animation: fadeIn 0.3s ease;
+}
+
+.cjx-retention [data-cjx-entrance] {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}

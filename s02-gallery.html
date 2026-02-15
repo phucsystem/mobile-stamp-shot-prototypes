@@ -1,0 +1,221 @@
+<!--
+  Screen: S-02 Gallery Screen (GalleryScreen.tsx)
+  CJX Stage: Retention
+  FR Mapping: FR-08
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S-02 Gallery</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="components.css">
+  <style>
+    .gallery-item .timestamp-badge {
+      position: absolute;
+      bottom: 4px;
+      left: 4px;
+      font: var(--text-mono);
+      font-size: 8px;
+      color: rgba(255,255,255,0.8);
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      padding: 2px 4px;
+      border-radius: 2px;
+      z-index: 2;
+    }
+    .load-more-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-lg);
+      color: var(--color-text-soft);
+      font: var(--text-caption);
+      gap: var(--space-sm);
+    }
+    .load-more-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(0,0,0,0.08);
+      border-top-color: var(--color-accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    /* --- Date Group Headers --- */
+    .gallery-date-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .gallery-date-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-sm) var(--space-md);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: var(--color-background);
+    }
+
+    .gallery-date-label {
+      font: var(--text-body2);
+      font-weight: 600;
+      color: var(--color-text);
+      font-size: 14px;
+    }
+
+    .gallery-date-count {
+      font: var(--text-caption);
+      color: var(--gray5);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body class="cjx-retention">
+  <div class="app-layout">
+    <nav class="sidebar hide-mobile"></nav>
+    <main class="main-content" data-cjx-entrance>
+
+      <!-- Header: "Back" button | "Gallery" title | spacer -->
+      <header class="screen-header" data-cjx-entrance>
+        <button class="back-btn" aria-label="Go back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15,18 9,12 15,6"/>
+          </svg>
+        </button>
+        <h1 class="screen-header-center">Gallery</h1>
+        <div style="width:var(--icon-button);"></div>
+      </header>
+
+      <!-- Content: 3-column grid of photo tiles -->
+      <div class="scroll-content">
+
+        <!-- === Today === -->
+        <div class="gallery-date-group" data-cjx-entrance>
+          <div class="gallery-date-header">
+            <span class="gallery-date-label">Today</span>
+            <span class="gallery-date-count">6 photos</span>
+          </div>
+          <div class="gallery-grid">
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#1a2a3a,#2a4a6a);"></div>
+              <span class="timestamp-badge">14:30</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#2a1a3a,#5a3a7a);"></div>
+              <span class="timestamp-badge">14:28</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#3a2a1a,#7a5a3a);"></div>
+              <span class="timestamp-badge">14:25</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#1a3a2a,#3a7a5a);"></div>
+              <span class="timestamp-badge">13:15</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#3a1a1a,#7a3a3a);"></div>
+              <span class="timestamp-badge">13:12</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#1a1a3a,#3a3a7a);"></div>
+              <span class="timestamp-badge">12:45</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- === Yesterday === -->
+        <div class="gallery-date-group" data-cjx-entrance>
+          <div class="gallery-date-header">
+            <span class="gallery-date-label">Yesterday</span>
+            <span class="gallery-date-count">6 photos</span>
+          </div>
+          <div class="gallery-grid">
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#2a2a1a,#6a6a3a);"></div>
+              <span class="timestamp-badge">11:30</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#1a2a2a,#3a6a6a);"></div>
+              <span class="timestamp-badge">11:22</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#2a1a2a,#6a3a6a);"></div>
+              <span class="timestamp-badge">10:58</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#0d1b2a,#1b2d40);"></div>
+              <span class="timestamp-badge">10:30</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#2a1b0d,#4a3020);"></div>
+              <span class="timestamp-badge">10:15</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#0d2a1b,#204a30);"></div>
+              <span class="timestamp-badge">09:45</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- === Feb 13, 2026 === -->
+        <div class="gallery-date-group" data-cjx-entrance>
+          <div class="gallery-date-header">
+            <span class="gallery-date-label">Feb 13, 2026</span>
+            <span class="gallery-date-count">8 photos</span>
+          </div>
+          <div class="gallery-grid">
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#1b0d2a,#302040);"></div>
+              <span class="timestamp-badge">09:20</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#2a2a0d,#4a4a20);"></div>
+              <span class="timestamp-badge">09:10</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#0d2a2a,#204a4a);"></div>
+              <span class="timestamp-badge">08:55</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#1a1520,#3a2a45);"></div>
+              <span class="timestamp-badge">08:30</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#201a15,#453a2a);"></div>
+              <span class="timestamp-badge">08:15</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#15201a,#2a453a);"></div>
+              <span class="timestamp-badge">07:45</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#1a1a25,#2a2a45);"></div>
+              <span class="timestamp-badge">07:30</span>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-item-gradient" style="background:linear-gradient(135deg,#251a1a,#452a2a);"></div>
+              <span class="timestamp-badge">07:15</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Load more (infinite scroll indicator) -->
+        <div class="load-more-indicator" data-cjx-entrance>
+          <div class="load-more-spinner"></div>
+          Loading more...
+        </div>
+
+      </div>
+
+      <!-- Toast -->
+      <div class="toast"></div>
+
+    </main>
+  </div>
+  <script src="interactions.js"></script>
+</body>
+</html>

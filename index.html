@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StampShot Prototypes</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="components.css">
+  <style>
+    body {
+      background: var(--color-background);
+      color: var(--color-text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .index-container {
+      max-width: 400px;
+      width: 100%;
+      padding: var(--space-lg);
+    }
+    .index-title {
+      font: var(--text-heading);
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: var(--space-xs);
+    }
+    .index-subtitle {
+      font: var(--text-caption);
+      color: var(--color-text-soft);
+      text-align: center;
+      margin-bottom: var(--space-xl);
+    }
+    .screen-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .screen-link {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      text-decoration: none;
+      color: var(--color-text);
+      transition: background 0.15s ease;
+    }
+    .screen-link:hover {
+      background: var(--color-surface-hover);
+    }
+    .screen-number {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-full);
+      background: var(--color-accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font: var(--text-body);
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .screen-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .screen-name {
+      font: var(--text-body);
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .screen-desc {
+      font: var(--text-caption);
+      color: var(--color-text-soft);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="index-container">
+    <h1 class="index-title">StampShot</h1>
+    <p class="index-subtitle">Interactive UI Prototypes</p>
+    <div class="screen-list">
+      <a href="s01-camera.html" class="screen-link">
+        <span class="screen-number">01</span>
+        <div class="screen-info">
+          <span class="screen-name">Camera</span>
+          <span class="screen-desc">Capture with watermark, zoom, project selector</span>
+        </div>
+      </a>
+      <a href="s02-gallery.html" class="screen-link">
+        <span class="screen-number">02</span>
+        <div class="screen-info">
+          <span class="screen-name">Gallery</span>
+          <span class="screen-desc">Date-grouped photo grid with sticky headers</span>
+        </div>
+      </a>
+      <a href="s03-settings.html" class="screen-link">
+        <span class="screen-number">03</span>
+        <div class="screen-info">
+          <span class="screen-name">Settings</span>
+          <span class="screen-desc">Collapsible sections, watermark config</span>
+        </div>
+      </a>
+      <a href="s04-photo-preview.html" class="screen-link">
+        <span class="screen-number">04</span>
+        <div class="screen-info">
+          <span class="screen-name">Photo Preview</span>
+          <span class="screen-desc">Keep, share, or discard captured photo</span>
+        </div>
+      </a>
+      <a href="s05-projects-list.html" class="screen-link">
+        <span class="screen-number">05</span>
+        <div class="screen-info">
+          <span class="screen-name">Projects List</span>
+          <span class="screen-desc">Search and manage project collections</span>
+        </div>
+      </a>
+      <a href="s06-project-detail.html" class="screen-link">
+        <span class="screen-number">06</span>
+        <div class="screen-info">
+          <span class="screen-name">Project Detail</span>
+          <span class="screen-desc">Project photos, info, and actions</span>
+        </div>
+      </a>
+      <a href="s07-map-view.html" class="screen-link">
+        <span class="screen-number">07</span>
+        <div class="screen-info">
+          <span class="screen-name">Map View</span>
+          <span class="screen-desc">Photo locations with filter chips</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
