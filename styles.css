@@ -404,6 +404,150 @@ body {
   }
 }
 
+/* --- Mobile: Floating FAB + Overlay Navigation Sheet --- */
+.proto-nav-fab {
+  display: none;
+}
+
+@media (max-width: 500px) {
+  .proto-nav-fab {
+    display: flex;
+    position: fixed;
+    top: max(10px, env(safe-area-inset-top));
+    right: 10px;
+    z-index: 9998;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: none;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: rgba(255, 255, 255, 0.9);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  .proto-nav-fab:active {
+    transform: scale(0.92);
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  /* Overlay container */
+  .proto-nav-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .proto-nav-overlay.open {
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  /* Backdrop */
+  .proto-nav-overlay-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .proto-nav-overlay.open .proto-nav-overlay-backdrop {
+    opacity: 1;
+  }
+
+  /* Bottom sheet */
+  .proto-nav-overlay-sheet {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--color-surface, #fff);
+    border-radius: 20px 20px 0 0;
+    padding: 12px 20px max(24px, env(safe-area-inset-bottom));
+    max-height: 70dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .proto-nav-overlay.open .proto-nav-overlay-sheet {
+    transform: translateY(0);
+  }
+
+  /* Handle bar */
+  .proto-nav-overlay-handle {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: #d1d5db;
+    margin: 0 auto 12px;
+    cursor: pointer;
+  }
+
+  /* Title */
+  .proto-nav-overlay-title {
+    font-family: var(--font-heading, -apple-system, sans-serif);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-text, #212121);
+    margin-bottom: 12px;
+  }
+
+  /* List */
+  .proto-nav-overlay-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  /* Group label */
+  .proto-nav-overlay-group {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-text-soft, #757575);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 12px 8px 4px;
+  }
+
+  .proto-nav-overlay-group:first-child {
+    padding-top: 0;
+  }
+
+  /* Screen link */
+  .proto-nav-overlay-link {
+    display: block;
+    padding: 12px 12px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-text, #212121);
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+
+  .proto-nav-overlay-link:hover,
+  .proto-nav-overlay-link:active {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .proto-nav-overlay-link.active {
+    background: rgba(25, 118, 210, 0.1);
+    color: var(--color-accent, #1976D2);
+    font-weight: 600;
+  }
+}
+
 /* --- Tablet: shrink proto-nav, keep phone frame centered --- */
 @media (min-width: 501px) and (max-width: 768px) {
   .proto-nav {

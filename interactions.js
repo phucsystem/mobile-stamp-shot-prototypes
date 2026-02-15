@@ -51,9 +51,70 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.body.insertBefore(nav, document.body.firstChild);
 
-    /* --- Hamburger Toggle for proto-nav on medium screens --- */
     var isMobile = window.matchMedia('(max-width: 500px)').matches;
-    if (!isMobile) {
+
+    if (isMobile) {
+      /* --- Mobile: floating FAB + bottom-sheet overlay nav --- */
+      var fab = document.createElement('button');
+      fab.className = 'proto-nav-fab';
+      fab.setAttribute('aria-label', 'Screen navigation');
+      fab.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
+      document.body.appendChild(fab);
+
+      /* Build mobile overlay sheet */
+      var overlay = document.createElement('div');
+      overlay.className = 'proto-nav-overlay';
+
+      var backdrop = document.createElement('div');
+      backdrop.className = 'proto-nav-overlay-backdrop';
+      overlay.appendChild(backdrop);
+
+      var sheet = document.createElement('div');
+      sheet.className = 'proto-nav-overlay-sheet';
+
+      var handle = document.createElement('div');
+      handle.className = 'proto-nav-overlay-handle';
+      sheet.appendChild(handle);
+
+      var sheetTitle = document.createElement('div');
+      sheetTitle.className = 'proto-nav-overlay-title';
+      sheetTitle.textContent = 'Screens';
+      sheet.appendChild(sheetTitle);
+
+      var sheetList = document.createElement('div');
+      sheetList.className = 'proto-nav-overlay-list';
+
+      screens.forEach(function (section) {
+        var groupLabel = document.createElement('div');
+        groupLabel.className = 'proto-nav-overlay-group';
+        groupLabel.textContent = section.group;
+        sheetList.appendChild(groupLabel);
+
+        section.items.forEach(function (screen) {
+          var link = document.createElement('a');
+          link.href = screen.file;
+          link.className = 'proto-nav-overlay-link';
+          if (currentFile === screen.file) {
+            link.classList.add('active');
+          }
+          link.textContent = screen.label;
+          sheetList.appendChild(link);
+        });
+      });
+
+      sheet.appendChild(sheetList);
+      overlay.appendChild(sheet);
+      document.body.appendChild(overlay);
+
+      function openMobileNav() { overlay.classList.add('open'); }
+      function closeMobileNav() { overlay.classList.remove('open'); }
+
+      fab.addEventListener('click', openMobileNav);
+      backdrop.addEventListener('click', closeMobileNav);
+      handle.addEventListener('click', closeMobileNav);
+
+    } else {
+      /* --- Desktop/Tablet: hamburger toggle for sidebar --- */
       var toggleBtn = document.createElement('button');
       toggleBtn.className = 'proto-nav-toggle';
       toggleBtn.setAttribute('aria-label', 'Toggle screen navigation');
