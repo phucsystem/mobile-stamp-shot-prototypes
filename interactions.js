@@ -50,6 +50,23 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.body.insertBefore(nav, document.body.firstChild);
+
+    /* --- Hamburger Toggle for proto-nav on medium screens --- */
+    var isMobile = window.matchMedia('(max-width: 500px)').matches;
+    if (!isMobile) {
+      var toggleBtn = document.createElement('button');
+      toggleBtn.className = 'proto-nav-toggle';
+      toggleBtn.setAttribute('aria-label', 'Toggle screen navigation');
+      toggleBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
+      document.body.appendChild(toggleBtn);
+
+      var navOpen = true;
+      toggleBtn.addEventListener('click', function () {
+        navOpen = !navOpen;
+        nav.style.transform = navOpen ? 'translateX(0)' : 'translateX(-100%)';
+        document.body.style.paddingLeft = navOpen ? '' : '0';
+      });
+    }
   })();
 
   /* --- CJX Stage Entrance Animations --- */

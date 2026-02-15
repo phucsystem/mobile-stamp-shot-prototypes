@@ -318,6 +318,157 @@ body {
   padding-top: 0 !important;
 }
 
+/* ==========================================================================
+   Mobile Responsive - Fullscreen on real devices
+   On screens narrower than 500px (actual phones), remove the phone frame
+   and proto-nav sidebar, making the prototype act like a real app.
+   ========================================================================== */
+
+/* --- Mobile: hide proto-nav, remove frame, go fullscreen --- */
+@media (max-width: 500px) {
+  html {
+    background: var(--color-background);
+  }
+
+  body {
+    padding: 0 !important;
+    padding-left: 0 !important;
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .proto-nav {
+    display: none !important;
+  }
+
+  .app-layout {
+    width: 100% !important;
+    height: 100dvh !important;
+    height: -webkit-fill-available;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* Safe area insets for notched phones */
+  .screen-header {
+    padding-top: max(var(--space-md), env(safe-area-inset-top));
+  }
+
+  .camera-white-top-bar {
+    padding-top: max(52px, calc(env(safe-area-inset-top) + var(--space-sm)));
+  }
+
+  .camera-top-bar {
+    padding-top: max(var(--space-2xl), calc(env(safe-area-inset-top) + var(--space-md)));
+  }
+
+  .camera-white-bottom {
+    padding-bottom: max(var(--space-xl), env(safe-area-inset-bottom));
+  }
+
+  .preview-action-bar {
+    padding-bottom: max(var(--space-2xl), env(safe-area-inset-bottom));
+  }
+
+  /* Gallery grid - slightly larger on small phones */
+  .gallery-grid {
+    gap: 1px;
+    padding: 0 1px;
+  }
+
+  /* Toast - respect safe area bottom */
+  .toast {
+    bottom: max(100px, calc(env(safe-area-inset-bottom) + 80px));
+  }
+
+  /* Bottom sheet safe area */
+  .bottom-sheet {
+    padding-bottom: max(var(--space-xl), env(safe-area-inset-bottom));
+  }
+
+  /* Project picker sheet safe area */
+  .project-picker-sheet {
+    padding-bottom: max(var(--space-2xl), env(safe-area-inset-bottom));
+  }
+
+  /* Modal sheet safe area */
+  .modal-sheet {
+    padding-bottom: max(var(--space-2xl), env(safe-area-inset-bottom));
+  }
+
+  /* Filter modal safe area */
+  .filter-modal-sheet {
+    padding-bottom: max(var(--space-2xl), env(safe-area-inset-bottom));
+  }
+}
+
+/* --- Tablet: shrink proto-nav, keep phone frame centered --- */
+@media (min-width: 501px) and (max-width: 768px) {
+  .proto-nav {
+    width: 140px;
+    padding: 10px 6px;
+  }
+
+  .proto-nav a {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+
+  .proto-nav-label {
+    font-size: 9px;
+  }
+
+  body {
+    padding-left: 140px !important;
+  }
+}
+
+/* --- Proto-nav hamburger toggle for medium screens --- */
+@media (max-width: 768px) {
+  .proto-nav-toggle {
+    display: flex;
+  }
+}
+
+@media (min-width: 769px) {
+  .proto-nav-toggle {
+    display: none;
+  }
+}
+
+/* --- Proto-nav Toggle Button (hamburger) --- */
+.proto-nav-toggle {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10000;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(24, 24, 27, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: rgba(255,255,255,0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: background 0.15s ease;
+}
+
+.proto-nav-toggle:hover {
+  background: rgba(24, 24, 27, 1);
+  color: #fff;
+}
+
+.proto-nav {
+  transition: transform 0.25s ease;
+}
+
 /* --- CJX Animations --- */
 .cjx-usage [data-cjx-entrance] {
   animation: fadeIn 0.3s ease;
